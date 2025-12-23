@@ -1,74 +1,23 @@
 'use client';
 
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LoadingSpinner from './LoadingSpinner';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+import { usePromptImprover } from '@/hooks/usePromptImprover';
 
 export default function HeroSection() {
-  const [idea, setIdea] = useState('');
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [copied, setCopied] = useState(false);
-  const [improveMethod, setImproveMethod] = useState('standard');
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (idea.trim().length < 10) {
-      setError('Please enter at least 10 characters');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-    setResult(null);
-
-    try {
-      const endpoint =
-        improveMethod === 'ai' ? '/api/v1/improve/ai' : '/api/v1/improve';
-      const response = await fetch(`${API_URL}${endpoint}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ idea }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setResult(data.data);
-      } else {
-        // Display backend error message or generic fallback
-        setError(
-          data.message ||
-            data.error ||
-            'Failed to improve prompt. Please try again.'
-        );
-      }
-    } catch (err) {
-      setError('Failed to connect to server. Make sure backend is running.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCopy = () => {
-    if (result) {
-      navigator.clipboard.writeText(result.improved);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
-  const handleReset = () => {
-    setIdea('');
-    setResult(null);
-    setError('');
-  };
+  const {
+    idea,
+    result,
+    loading,
+    error,
+    copied,
+    improveMethod,
+    setIdea,
+    setImproveMethod,
+    handleSubmit,
+    handleCopy,
+    handleReset,
+  } = usePromptImprover();
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-950 to-emerald-950 animate-gradient'>
